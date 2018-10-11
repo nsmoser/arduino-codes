@@ -8,6 +8,7 @@
 //all the serial.print functions are commented out at the moment
 //Program also displays temp on lcd screen instead of serial monitor
 //check lcd setup code to see how to set up lcd screen
+//now keeps track of max and min temp in fahrenheit
 #include <LiquidCrystal.h>
     // which analog pin to connect
     #define THERMISTORPIN A0         
@@ -27,13 +28,27 @@
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
     uint16_t samples[NUMSAMPLES];
-     
+    byte temp[8] = {
+      B00110,
+      B01001,
+      B01001,
+      B00110,
+      B00000,
+      B00000,
+      B00000,
+      B00000,
+    };
+     float tempfMax;
+     float tempfMin;
     void setup(void) {
+      lcd.createChar(0, temp);
       Serial.begin(9600);
       analogReference(EXTERNAL);
       pinMode(8, OUTPUT);
       pinMode(9, OUTPUT);
-      lcd.begin(16,2);
+      lcd.begin(20,4);
+      tempfMax = 0;
+      tempfMin = 100;
     }
      
     void loop(void) {
@@ -52,7 +67,7 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
          average += samples[i];
       }
       average /= NUMSAMPLES;
-     
+//     
       //Serial.print("Average analog reading "); 
       //Serial.println(average);
      
@@ -72,6 +87,22 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
       float tempf;
       tempf = tempc * 1.8;                //convert to F
       tempf = tempf + 32;
+      if (tempf > tempfMax)
+      {
+        tempfMax = tempf;
+      }
+      else
+      {
+        tempfMax = tempfMax;
+      }
+      if (tempfMin > tempf)
+      {
+        tempfMin = tempf;
+      }
+      else
+      {
+        tempfMin = tempfMin;
+      }
 
       if (tempf < 32)
       {
@@ -80,15 +111,28 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
       //Serial.print(tempc);
       //Serial.println(" C");
       //Serial.print("Temperature ");
-      //Serial.print(tempf);
+      Serial.println(tempf);
       //Serial.println(" F");
       digitalWrite(9, HIGH);
       digitalWrite(8, LOW);
       lcd.clear();
-      lcd.print("Now Heating");
-      lcd.setCursor(0, 1);
+      lcd.print("Temperature:");
+      lcd.setCursor(13, 0);
       lcd.print(tempf);
-      lcd.print(" Degrees");
+      lcd.write(byte(0));
+      lcd.print("F");
+      lcd.setCursor(0, 1);
+      lcd.print("Max Temp:");
+      lcd.setCursor(13, 1);
+      lcd.print(tempfMax);
+      lcd.write(byte(0));
+      lcd.print("F");
+      lcd.setCursor(0, 2);
+      lcd.print("Min Temp:");
+      lcd.setCursor(13, 2);
+      lcd.print(tempfMin);
+      lcd.write(byte(0));
+      lcd.print("F");
       }
       else
       {
@@ -97,15 +141,28 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
       //Serial.print(tempc);
       //Serial.println(" C");
       //Serial.print("Temperature ");
-      //Serial.print(tempf);
+      //Serial.println(tempf);
       //Serial.println(" F");
       digitalWrite(8, HIGH);
       digitalWrite(9, LOW);
       lcd.clear();
-      lcd.print("Current Temp (F)");
-      lcd.setCursor(0, 1);
+      lcd.print("Temperature:");
+      lcd.setCursor(13, 0);
       lcd.print(tempf);
-      lcd.print(" Degrees");
+      lcd.write(byte(0));
+      lcd.print("F");
+      lcd.setCursor(0, 1);
+      lcd.print("Max Temp:");
+      lcd.setCursor(13, 1);
+      lcd.print(tempfMax);
+      lcd.write(byte(0));
+      lcd.print("F");
+      lcd.setCursor(0, 2);
+      lcd.print("Min Temp:");
+      lcd.setCursor(13, 2);
+      lcd.print(tempfMin);
+      lcd.write(byte(0));
+      lcd.print("F");
       }
       delay(1000);
     }

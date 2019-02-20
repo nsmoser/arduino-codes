@@ -1,0 +1,14 @@
+const int rs=13,en=12,d4=11,d5=10,d6=9,d7=8;
+LiquidCrystal lcd(rs,en,d4,d5,d6,d7);
+void setup() {
+  // put your setup code here, to run once:
+Serial1.begin(9600);
+Serial.begin(9600);
+lcd.begin(20,4);
+ pinMode(5,OUTPUT);
+ pinMode(6,OUTPUT);
+ analogWrite(5,50);
+ analogWrite(6,75);
+ lcd.home();
+ Wire.begin(9);
+}

@@ -1,0 +1,42 @@
+/*this program uses adafruit stemma soil sensor and 4x20 lcd screen
+to report temperature and soil readings to the lcd screen*/
+
+#include"Adafruit_seesaw.h"
+#include<LiquidCrystal.h>
+
+Adafruit_seesaw ss;
+const int rs=7,en=12,d4=11,d5=10,d6=9,d7=8;   //sets up lcd screen, these can be changed
+LiquidCrystal lcd(rs,en,d4,d5,d6,d7);
+byte temp[8] = {    //creates symbol for temp since there isnt one built in to system
+  B00110,
+  B01001,
+  B01001,
+  B00110,
+  B00000,
+  B00000,
+  B00000,
+};
+
+
+void setup() {
+  lcd.createChar(0,temp);   //creates degree
+  lcd.begin(20,4);
+  pinMode(5,OUTPUT);      //these use pwn to simulate voltage for screen contrast and brightness
+  pinMode(6,OUTPUT);      //can be changed as needed
+  analogWrite(5,50);
+  analogWrite(6,75);
+  Serial.begin(115200);   //used for debugging, just switch lcd.print to serial.print
+  ss.begin(0x36);         //finds soil sensor over i2c
+}
+
+void loop() {
+  float tempC = ss.getTemp();         //gets soil temp in c and f, plus cap reading
+  float tempF=(tempC*(9.0/5.0))+32.0;
+  uint16_t capread = ss.touchRead(0);
+
+  lcd.print("Soil Temp: ");lcd.print(tempF);lcd.write(byte(0));   //prints info to lcd screen
+  lcd.setCursor(0,1);
+  lcd.print("Soil reading: ");lcd.print(capread);
+  lcd.setCursor(0,0);
+  delay(1000);
+}
